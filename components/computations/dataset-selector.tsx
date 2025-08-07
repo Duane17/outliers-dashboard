@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Check, Database, Users, Shield, AlertCircle } from "lucide-react"
+import React, { useState } from "react"
+import { Check, Database as DatabaseIcon, Users as UsersIcon, Shield as ShieldIcon, AlertCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -13,7 +13,11 @@ interface DatasetSelectorProps {
   onSelectionChange: (selectedIds: string[]) => void
 }
 
-export function DatasetSelector({ datasets, selectedDatasets, onSelectionChange }: DatasetSelectorProps) {
+export function DatasetSelector({
+  datasets,
+  selectedDatasets,
+  onSelectionChange,
+}: DatasetSelectorProps) {
   const [expandedDataset, setExpandedDataset] = useState<string | null>(null)
 
   const formatFileSize = (bytes: number) => {
@@ -24,24 +28,23 @@ export function DatasetSelector({ datasets, selectedDatasets, onSelectionChange 
     return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`
   }
 
-  const handleDatasetToggle = (datasetId: string) => {
-    const isSelected = selectedDatasets.includes(datasetId)
-    if (isSelected) {
-      onSelectionChange(selectedDatasets.filter((id) => id !== datasetId))
-    } else {
-      onSelectionChange([...selectedDatasets, datasetId])
-    }
+  const handleDatasetToggle = (id: string) => {
+    const isSelected = selectedDatasets.includes(id)
+    const updated = isSelected
+      ? selectedDatasets.filter((sid) => sid !== id)
+      : [...selectedDatasets, id]
+    onSelectionChange(updated)
   }
 
-  const handlePreviewToggle = (datasetId: string) => {
-    setExpandedDataset(expandedDataset === datasetId ? null : datasetId)
+  const handlePreviewToggle = (id: string) => {
+    setExpandedDataset(expandedDataset === id ? null : id)
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-600">Select one or more datasets for computation</p>
-        <Badge variant="secondary" className="bg-slate-100 text-slate-800">
+        <p className="text-sm text-muted-foreground">Select one or more datasets for computation</p>
+        <Badge variant="secondary" className="bg-muted border-muted text-muted-foreground">
           {selectedDatasets.length} selected
         </Badge>
       </div>
@@ -55,47 +58,46 @@ export function DatasetSelector({ datasets, selectedDatasets, onSelectionChange 
             <Card
               key={dataset.id}
               className={cn(
-                "transition-all duration-200 cursor-pointer",
+                "transition-all duration-200 cursor-pointer border rounded-lg",
                 isSelected
                   ? "border-[#3A6EFF]/50 bg-[#3A6EFF]/10"
-                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                  : "border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300"
               )}
             >
               <CardContent className="p-4">
-                <div onClick={() => handleDatasetToggle(dataset.id)} className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
+                <div className="flex flex-wrap items-start justify-between gap-4 sm:gap-6">
+                  <div className="flex gap-3 flex-1 min-w-0 flex-wrap sm:flex-nowrap">
+                    {/* Checkbox */}
                     <div
                       className={cn(
-                        "w-5 h-5 rounded border-2 flex items-center justify-center mt-0.5 transition-colors",
+                        "w-5 h-5 rounded border-2 flex items-center justify-center mt-0.5 shrink-0",
                         isSelected ? "border-[#3A6EFF] bg-[#3A6EFF]" : "border-slate-300"
                       )}
                     >
                       {isSelected && <Check className="h-3 w-3 text-white" />}
                     </div>
 
+                    {/* Dataset Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-medium text-slate-900 truncate">{dataset.name}</h3>
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <h3 className="font-medium text-slate-900 truncate break-words">{dataset.name}</h3>
                         {dataset.shared && (
                           <Badge variant="secondary" className="bg-[#22D3A6]/10 text-[#22D3A6] border-[#22D3A6]/20">
-                            <Users className="h-3 w-3 mr-1" />
-                            Shared
+                            <UsersIcon className="h-3 w-3 mr-1" /> Shared
                           </Badge>
                         )}
                         {dataset.smpcReady ? (
                           <Badge variant="secondary" className="bg-[#22D3A6]/10 text-[#22D3A6] border-[#22D3A6]/20">
-                            <Shield className="h-3 w-3 mr-1" />
-                            SMPC Ready
+                            <ShieldIcon className="h-3 w-3 mr-1" /> SMPC Ready
                           </Badge>
                         ) : (
-                          <Badge variant="secondary" className="bg-red-100 text-red-400 border-red-200/50">
-                            <AlertCircle className="h-3 w-3 mr-1" />
-                            Not Ready
+                          <Badge variant="secondary" className="bg-rose-100 text-rose-600 border-rose-200">
+                            <AlertCircle className="h-3 w-3 mr-1" /> Not Ready
                           </Badge>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-4 text-sm text-slate-600">
+                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                         <span>Owner: {dataset.owner}</span>
                         <span>{formatFileSize(dataset.size)}</span>
                         <span>{dataset.columns.length} columns</span>
@@ -116,35 +118,37 @@ export function DatasetSelector({ datasets, selectedDatasets, onSelectionChange 
                     </div>
                   </div>
 
+                  {/* Preview Toggle */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       handlePreviewToggle(dataset.id)
                     }}
-                    className="text-[#3A6EFF] hover:text-[#22D3A6] text-sm font-medium transition-colors ml-4"
+                    className="shrink-0 text-[#3A6EFF] hover:text-[#22D3A6] text-sm font-medium transition-colors"
                   >
                     {isExpanded ? "Hide" : "Preview"}
                   </button>
                 </div>
 
+                {/* Expanded Preview */}
                 {isExpanded && (
                   <div className="mt-4 pt-4 border-t border-slate-200">
                     <div className="flex items-center gap-2 mb-3">
-                      <Database className="h-4 w-4 text-slate-600" />
-                      <span className="text-sm font-medium text-slate-800">Column Schema</span>
+                      <DatabaseIcon className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-slate-900">Column Schema</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {dataset.columns.map((column) => (
+                      {dataset.columns.map((col) => (
                         <div
-                          key={column.name}
+                          key={col.name}
                           className="flex items-center justify-between p-2 bg-white rounded border border-slate-200"
                         >
-                          <span className="text-sm text-slate-900 font-mono">{column.name}</span>
+                          <span className="text-sm text-slate-900 font-mono break-words">{col.name}</span>
                           <div className="flex items-center gap-2">
                             <Badge variant="secondary" className="bg-slate-100 text-slate-600 text-xs">
-                              {column.type}
+                              {col.type}
                             </Badge>
-                            {column.nullable && (
+                            {col.nullable && (
                               <Badge variant="secondary" className="bg-slate-50 text-slate-500 text-xs">
                                 nullable
                               </Badge>
