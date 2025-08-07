@@ -1,0 +1,7 @@
+node_modules
+build
+dist
+public/**/*.png
+public/**/*.svg
+package-lock.json
+.env
