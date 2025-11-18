@@ -1,24 +1,36 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Menu, User, LogOut, HelpCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import Link from "next/link";
+import { Menu, User, LogOut, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { NotificationDropdown } from "./notification-dropdown"
-import type { Notification } from "@/types/notifications"
+} from "@/components/ui/dropdown-menu";
+import { NotificationDropdown } from "./notification-dropdown";
+import type { Notification } from "@/types/notifications";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface TopNavigationProps {
-  onMenuToggle: () => void
+  onMenuToggle: () => void;
 }
 
 export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
+  // Pull the authenticated user from the AuthProvider
+  const { user } = useAuth();
+
+  const displayEmail = user?.email ?? "user@example.com";
+  const displayName =
+    (user?.name && user.name.trim().length > 0
+      ? user.name
+      : user?.email
+      ? user.email.split("@")[0]
+      : "User") || "User";
+
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: "1",
@@ -50,19 +62,19 @@ export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
       priority: "high",
       metadata: { location: "Unknown (VPN)" },
     },
-  ])
+  ]);
 
   const handleMarkAsRead = (id: string, isRead: boolean) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead } : n)))
-  }
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead } : n)));
+  };
 
   const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
-  }
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  };
 
   const handleDeleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id))
-  }
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/90 backdrop-blur-md shadow-sm">
@@ -84,7 +96,9 @@ export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
               alt="Outliers Logo"
               className="h-8 w-8 rounded-lg object-cover"
             />
-            <span className="font-semibold text-xl text-gray-900 hidden sm:block">Outliers</span>
+            <span className="font-semibold text-xl text-gray-900 hidden sm:block">
+              Outliers
+            </span>
           </div>
         </div>
 
@@ -102,11 +116,12 @@ export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
               <Button
                 className="
                   relative h-10 w-10 rounded-full
-                  bg-gradient-to-br from-[#3A6EFF] to-[#22D3A6]
+                  bg-linear-to-br from-[#3A6EFF] to-[#22D3A6]
                   flex items-center justify-center
                   hover:scale-105 hover:shadow-md
                   transition-transform
                 "
+                aria-label={displayName}
               >
                 <User className="h-6 w-6 text-white" />
               </Button>
@@ -121,7 +136,7 @@ export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
                 <div
                   className="
                     h-8 w-8 rounded-full
-                    bg-gradient-to-br from-[#3A6EFF] to-[#22D3A6]
+                    bg-linear-to-br from-[#3A6EFF] to-[#22D3A6]
                     flex items-center justify-center
                     hover:from-[#3A6EFF]/75 hover:to-[#22D3A6]/75
                     transition-colors
@@ -130,8 +145,8 @@ export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium text-gray-900">User Name</p>
-                  <p className="text-xs text-gray-500">user@email.com</p>
+                  <p className="text-sm font-medium text-gray-900">{displayName}</p>
+                  <p className="text-xs text-gray-500">{displayEmail}</p>
                 </div>
               </div>
 
@@ -152,7 +167,7 @@ export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
                 </Link>
               </DropdownMenuItem>
 
-              {/* Help & Support */}
+              {/* Help and Support */}
               <DropdownMenuItem asChild>
                 <Link
                   href="/help"
@@ -163,7 +178,7 @@ export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
                   "
                 >
                   <HelpCircle className="mr-2 h-4 w-4 text-gray-400 group-hover:text-gray-700 transition-colors" />
-                  Help & Support
+                  Help and Support
                 </Link>
               </DropdownMenuItem>
 
@@ -185,5 +200,5 @@ export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
         </div>
       </div>
     </header>
-  )
+  );
 }

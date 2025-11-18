@@ -35,7 +35,7 @@ export default function Dashboard() {
 
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Welcome back, User!</h1>
+            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Welcome back!</h1>
             <p className="text-gray-600">
               Here's what's happening with your data collaboration projects today.
             </p>
