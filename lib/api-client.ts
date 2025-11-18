@@ -24,3 +24,14 @@ export async function getCurrentUser(): Promise<MeUser> {
   const res = await http<MeResponse>("/auth/me", { method: "GET" });
   return res.user;
 }
+
+
+/**
+ * Call POST /v1/auth/logout.
+ * On success, the server clears the httpOnly cookie.
+ */
+export async function logoutUser(): Promise<void> {
+  await http("/auth/logout", {
+    method: "POST",
+  });
+}

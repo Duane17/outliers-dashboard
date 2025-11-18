@@ -1,3 +1,4 @@
+// outliers-dashboard/components/auth/AuthProvider.tsx
 "use client";
 
 import type React from "react";
@@ -8,7 +9,8 @@ import {
   useState,
   useCallback,
 } from "react";
-import { getCurrentUser, type MeUser, HttpError } from "@/lib/api-client";
+import { getCurrentUser, logoutUser, type MeUser, HttpError } from "@/lib/api-client";
+import { getMarketingAuthUrl } from "@/lib/config";
 
 type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
@@ -16,6 +18,7 @@ interface AuthContextValue {
   status: AuthStatus;
   user: MeUser | null;
   refresh: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -46,27 +49,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // On first mount, resolve the current session.
+    // On first mount, resolve the current session
     loadUser();
   }, [loadUser]);
+
+  const refresh = async () => {
+    setStatus("loading");
+    await loadUser();
+  };
+
+  const logout = async () => {
+    try {
+      // Tell backend to clear the httpOnly cookie
+      await logoutUser();
+    } catch (err) {
+      // Log but still clear local state, since cookie may already be gone
+      console.error("Failed to logout on server", err);
+    } finally {
+      // Clear local auth state
+      setUser(null);
+      setStatus("unauthenticated");
+
+      // Redirect to marketing auth page without next
+      const target = getMarketingAuthUrl();
+      if (typeof window !== "undefined") {
+        window.location.href = target;
+      }
+    }
+  };
 
   const value: AuthContextValue = {
     status,
     user,
-    refresh: async () => {
-      setStatus("loading");
-      await loadUser();
-    },
+    refresh,
+    logout,
   };
 
-  // While loading, we block rendering of the dashboard chrome
-  // and show a simple full screen loader instead.
+  // While loading, block dashboard chrome and show a full screen loader
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-200">
+      <div className="min-h-screen flex items-center justify-center bg-white text-neural-blue">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 rounded-full border-2 border-slate-700 border-t-neural-blue animate-spin" />
-          <p className="text-sm text-slate-400 font-inter">
+          <div className="h-10 w-10 rounded-full border-2 border-slate-200 border-t-[#3A6EFF] animate-spin" />
+          <p className="text-sm text-[#3A6EFF] font-inter">
             Preparing your workspace...
           </p>
         </div>
@@ -80,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 /**
  * Hook to consume auth state inside the dashboard.
  * Example:
- *   const { status, user, refresh } = useAuth();
+ *   const { status, user, refresh, logout } = useAuth();
  */
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);

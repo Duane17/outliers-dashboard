@@ -1,3 +1,4 @@
+// outliers-dashboard/components/layout/top-navigation.tsx
 "use client";
 
 import { useState } from "react";
@@ -20,9 +21,10 @@ interface TopNavigationProps {
 }
 
 export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
-  // Pull the authenticated user from the AuthProvider
-  const { user } = useAuth();
+  // Auth state from provider
+  const { user, logout } = useAuth();
 
+  // Derive display name and email
   const displayEmail = user?.email ?? "user@example.com";
   const displayName =
     (user?.name && user.name.trim().length > 0
@@ -74,6 +76,10 @@ export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
 
   const handleDeleteNotification = (id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const handleLogout = async () => {
+    await logout();
   };
 
   return (
@@ -186,6 +192,10 @@ export function TopNavigation({ onMenuToggle }: TopNavigationProps) {
 
               {/* Logout */}
               <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  void handleLogout();
+                }}
                 className="
                   group flex items-center px-3 py-2 text-sm text-red-500
                   transition-all duration-150 ease-in-out
