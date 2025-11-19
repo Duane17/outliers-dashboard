@@ -11,6 +11,7 @@ import { MARKETING_URL, AUTH_PATH } from "@/lib/config";
  * Responsibilities:
  * - Read auth status from AuthProvider.
  * - If unauthenticated, redirect to marketing auth with a `next` query param.
+ * - For error state, do not redirect so the error screen can show retry.
  * - Return the current status so pages can decide what to render in the meantime.
  */
 export function useRequireAuth() {
@@ -29,6 +30,10 @@ export function useRequireAuth() {
         window.location.href = url;
       }
     }
+
+    // For status "loading" and "error" we do not redirect.
+    // - "loading" is handled by the full screen loader in AuthProvider
+    // - "error" is handled by the AuthErrorScreen with retry
   }, [status, pathname]);
 
   return status;

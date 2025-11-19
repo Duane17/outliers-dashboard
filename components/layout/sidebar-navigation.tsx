@@ -25,7 +25,7 @@ interface NavigationItem {
 const navigationItems: NavigationItem[] = [
   { icon: LayoutDashboard, label: "Dashboard",      href: "/" },
   { icon: Database,        label: "Datasets",       href: "/datasets" },
-  // { icon: Users,           label: "Collaborations", href: "/collaborations" },
+  { icon: Users,           label: "Collaborations", href: "/collaborations" },
   { icon: Calculator,      label: "Computations",   href: "/computations" },
   { icon: BarChart3,       label: "Insights",       href: "/insights" },
 ]
@@ -94,7 +94,7 @@ export function SidebarNavigation({ isOpen, onClose }: SidebarNavigationProps) {
                 <span className="flex-1">{item.label}</span>
 
                 {hoveredItem === item.href && !isActive && (
-                  <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-[#3A6EFF]/5 to-[#22D3A6]/5 -z-10" />
+                  <div className="absolute inset-0 rounded-lg bg-linear-to-r from-[#3A6EFF]/5 to-[#22D3A6]/5 -z-10" />
                 )}
 
                 {isActive && (
